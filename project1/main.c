@@ -44,7 +44,7 @@ int main(int argc, char *argv[]){
     }
 
     char addy1, addy2;
-    int len1 = 0, newline = 0, pos1 = 0, pos2 = 0;
+    int len1 = 0, newline = 0, pos1 = 0, pos2 = 0, pos3 = 0;
     while(1){
         len1 = read(fp, &addy1, 1);                                          // read(int fd, *buff, count)
         if(len1 == -1){                                                      // error in reading
@@ -62,27 +62,22 @@ int main(int argc, char *argv[]){
 
         pos1++;
         if (newline == 1){
-
             lseek(fp, pos2, SEEK_SET);
-            int len2 = read(fp,&addy2, 1);
-            if(debugvar == 1)
-                printf("This is addy1 %c , this is addy2 %c \n", addy1, addy2);
-            if(len2 != -1 && addy2 == addy1){
-                pos2++;
+            read(fp,&addy2, 1);                                             // dont need to check for -1 cause its reading whats already been read
+            if(debugvar == 1){
+                printf("This is addy1 %c , this is addy2 %c, this is pos1 %d, this is pos2 %d \n", addy1, addy2, pos1, pos2);
+
+            }
+            if(addy2 == addy1 && debugvar == 0){
                 write(1, &addy1, 1);
             }
-            else{
-                newline = 0;
-            }
+            pos2++;
             lseek(fp, pos1, SEEK_SET);
         } // end of if(newline)
         if(addy1 == '\n'){
             newline = 1;
         }
         
-        
-        //write(1, &addy1, 1);
-    
     
     } // end of while
 
