@@ -50,45 +50,71 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    int current1 = 0, current2 = 0, linesize1 = 0, linesize2 = 0, tmp;
+    int current1 = 0, current2 = 0, linesize1 = 0, linesize2 = 0, check1, check2, nextlinesize;
     char ch1, ch2;
     while(1){
         // getting stuff from 2nd line
         linesize1 = getsize(fp);
         if(firstpass == 0){
-            lseek(fp, linesize1, SEEK_SET);
+            lseek(fp, linesize1, SEEK_SET); // getting to the 2nd line at the start
             firstpass = 1;
             current1 = linesize1;
+            nextlinesize = linesize1;
         }
         else
-            lseek(fp, current1, SEEK_SET);
+            lseek(fp, current1, SEEK_SET); // keep reading through the sentence
 
-        read(fp, &ch1, 1);
-        current1++; // keeping position
-        //printf("%c", ch1);
+        check1 = read(fp, &ch1, 1);
+        current1++; // keep iterating through, so move on to the next char
 
         // First line
-         if(ch1 == '\n'){
-            //printf("%d, %d \n", linesize1, linesize2);
-            lseek(fp, current2, SEEK_SET);
-            linesize2 = getsize(fp);
-            if(linesize2 == linesize1)
-                continue; // they are equal no point to check
-        }
+        //  if(ch1 == '\n'){
+        //     //printf("%d, %d \n", linesize1, linesize2);
+        //     linesize1 = getsize(fp); // get the 3rd lines size
+        //     lseek(fp, current1 - linesize1 + 1, SEEK_SET); // get 2nd line
+        //     linesize2 = getsize(fp); // get size of 2nd line
+        //     if(linesize2 == linesize1){
+        //         //printf("%d\n", linesize2);
+        //         current2 = current1 - linesize1;
+        //     }
+        // }
         // figure out how to keep the new lines matching each other, so they start on a fresh line when needed
-        lseek(fp, current2, SEEK_SET);
-            
-        tmp = read(fp, &ch2, 1);
-        //printf("%c", ch2);
+        
+        // if the 2nd line in the file goes to a new line the first line in the file should move
+        // to a new line aka the next line in the file. Line2 -> line3, line1 -> line2O
+        if(ch1 == '\n'){ 
+            linesize1 = getsize(fp); // gets size of 3rd line
 
-        printf("%c, %c \n", ch1, ch2);       
+            current2 = current1 - nextlinesize;
+            lseek(fp, current2, SEEK_SET);
+
+            linesize2 = getsize(fp); // gets size of 2nd line
+
+            if(linesize2 != linesize1){ // they arent the same size so we move onto the next line
+
+            }
+        }
+        else // keep going through the sentence its at
+            lseek(fp, current2, SEEK_SET);
+        
+        //lseek(fp, current2, SEEK_SET);
+        check2 = read(fp, &ch2, 1);
+
+        // debug
+        printf("%c", ch2);
+        //printf("This is ch1: %c\n", ch1);
+        //printf("This is current1: %d", current1);
+        //printf("This is current2: %d", current2);     
+        //printf("This is ch1: %c, This is ch2: %c \n", ch1, ch2);   
+
         // if(ch1 == ch2)
-        //     printf("%c", ch2);
+        //     printf("%c", ch1);
         
         current2++;
-        if(tmp == 0)
-            exit(1);
 
+        // checks if something is at the end of file, exit(0) for being exit happy
+        if(check1 == 0 || check2 == 0)
+            exit(0); 
     } // end of while
     return 0;
 }
