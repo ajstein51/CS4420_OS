@@ -50,10 +50,10 @@ int main(int argc, char *argv[])
         exit(1);
     }
 
-    int current1 = 0, current2 = 0, sizeofline = 0, linesize1 = 0, linesize2 = 0, tmp, tmp2;
+    int current1 = 0, current2 = 0, linesize1 = 0, linesize2 = 0, tmp;
     char ch1, ch2;
     while(1){
-        // got ch1 with char from 2nd line
+        // getting stuff from 2nd line
         linesize1 = getsize(fp);
         if(firstpass == 0){
             lseek(fp, linesize1, SEEK_SET);
@@ -68,14 +68,23 @@ int main(int argc, char *argv[])
         //printf("%c", ch1);
 
         // First line
+         if(ch1 == '\n'){
+            //printf("%d, %d \n", linesize1, linesize2);
+            lseek(fp, current2, SEEK_SET);
+            linesize2 = getsize(fp);
+            if(linesize2 == linesize1)
+                continue; // they are equal no point to check
+        }
+        // figure out how to keep the new lines matching each other, so they start on a fresh line when needed
         lseek(fp, current2, SEEK_SET);
+            
         tmp = read(fp, &ch2, 1);
         //printf("%c", ch2);
 
-        if (ch2 == ch1){
-            printf("%c", ch2);
-        }
-
+        printf("%c, %c \n", ch1, ch2);       
+        // if(ch1 == ch2)
+        //     printf("%c", ch2);
+        
         current2++;
         if(tmp == 0)
             exit(1);
@@ -85,9 +94,9 @@ int main(int argc, char *argv[])
 }
 // when line1 gets to a newline, the 2nd one needs to drop and go to the new line as well. Stop it from lagging behind
 int getsize(int fp){
-    int count = 0, n = 0;
+    int count = 0;
     char addy;
-    while(n = read(fp, &addy, 1) > 0){
+    while(read(fp, &addy, 1) > 0){
         if(addy != '\n')
             count++;
         else if(addy == '\n'){
@@ -95,6 +104,7 @@ int getsize(int fp){
             return count;
         }
     }
+    
 }
 
 /*
