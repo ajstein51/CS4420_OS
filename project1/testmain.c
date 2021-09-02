@@ -3,7 +3,7 @@
  * Class: CS4420 - Operating Systems
  * Project1
  * Description: In this project we will essentially be redoing the system cmd of unique in c while using system calls only.
- */ 
+ */
 // includes
 #include <stdlib.h>
 #include <stdio.h>
@@ -11,43 +11,94 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-
-// functions:
 int getsize(int fp);
-
-// Global var
 int debugvar = 0;
-
-int main(int argc, char *argv[]){
+int firstpass = 0;
+int main(int argc, char *argv[])
+{
     // variable declarations
-    int fp;                                                               // open(const char* path, int flag, [, int mode])                                
-   
-   if(argc == 3){
-       if (strcmp(argv[1], "-d") == 0){
-           printf("Debugging mode is on \n");
-           debugvar = 1;
-       }
-       fp = open(argv[2], O_RDONLY);
-   }
-   else if (argc == 2){
-       fp = open(argv[1], O_RDONLY);
-   }
-   else{
-       printf("Too many arguments");
-       exit(1);
-   }
+    int fp; // open(const char* path, int flag, [, int mode])
 
-    // Check if the file can be opened or if its can't be seek'
-    if (fp == -1){
-        perror("Opening: ");                                            // perror(const char *s), gives you a string b4 error msg
+    if (argc == 3)
+    {
+        if (strcmp(argv[1], "-d") == 0)
+        {
+            printf("Debugging mode is on \n");
+            debugvar = 1;
+        }
+        fp = open(argv[2], O_RDONLY);
+    }
+    else if (argc == 2)
+    {
+        fp = open(argv[1], O_RDONLY);
+    }
+    else
+    {
+        printf("Too many arguments");
         exit(1);
     }
-    else if (lseek(fp, 0, SEEK_CUR) == -1){                              // check if file is able to seek, lseek(int fp, offset, whence)
+
+    // Check if the file can be opened or if its can't be seek'
+    if (fp == -1)
+    {
+        perror("Opening: "); // perror(const char *s), gives you a string b4 error msg
+        exit(1);
+    }
+    else if (lseek(fp, 0, SEEK_CUR) == -1)
+    { // check if file is able to seek, lseek(int fp, offset, whence)
         perror("Cant Seek: ");
         exit(1);
     }
 
-    char addy1, addy2;
+    int current1 = 0, current2 = 0, sizeofline = 0, linesize1 = 0, linesize2 = 0, tmp, tmp2;
+    char ch1, ch2;
+    while(1){
+        // got ch1 with char from 2nd line
+        linesize1 = getsize(fp);
+        if(firstpass == 0){
+            lseek(fp, linesize1, SEEK_SET);
+            firstpass = 1;
+            current1 = linesize1;
+        }
+        else
+            lseek(fp, current1, SEEK_SET);
+
+        read(fp, &ch1, 1);
+        current1++; // keeping position
+        //printf("%c", ch1);
+
+        // First line
+        lseek(fp, current2, SEEK_SET);
+        tmp = read(fp, &ch2, 1);
+        //printf("%c", ch2);
+
+        if (ch2 == ch1){
+            printf("%c", ch2);
+        }
+
+        current2++;
+        if(tmp == 0)
+            exit(1);
+
+    } // end of while
+    return 0;
+}
+// when line1 gets to a newline, the 2nd one needs to drop and go to the new line as well. Stop it from lagging behind
+int getsize(int fp){
+    int count = 0, n = 0;
+    char addy;
+    while(n = read(fp, &addy, 1) > 0){
+        if(addy != '\n')
+            count++;
+        else if(addy == '\n'){
+            count++;
+            return count;
+        }
+    }
+}
+
+/*
+char addy1, addy2;
     int len1 = 0, newline = 0, pos1 = 0, pos2 = 0, pos3 = 0;
     while(1){
         len1 = read(fp, &addy1, 1);                                          // read(int fd, *buff, count)
@@ -81,33 +132,4 @@ int main(int argc, char *argv[]){
         if(addy1 == '\n'){
             newline = 1;
         }
-        
-    
-    } // end of while
-
-
-    // shouldnt get down here
-    return 0;
-}
-
-int getsize(int fp){
-    int count = 0, n = 0;
-    char addy;
-    while (n = read(fp, &addy, 1) > 0)
-    {
-        count++;
-    }
-    return count;
-}
-
-/* example of printing out the file twice
-lseek(fp, 0, SEEK_CUR);
-        write(1, &addy1, 1);
-        if(len1 == 0){
-            lseek(fp, 0, SEEK_SET);
-            pos1++;
-        }
-        if(pos1 == 2){
-            exit(0);
-        }
-*/
+        */
