@@ -27,7 +27,6 @@ int main(int argc, char *argv[]){
     // Open and parse arguments
 //*************************************************************************
     if(argc == 3){                                                              // open(const char* path, int flag, [, int mode])
-
         if (strcmp(argv[1], "-d") == 0)
         {
             printf("Debugging mode is on \n");
@@ -35,16 +34,14 @@ int main(int argc, char *argv[]){
         }
         fp = open(argv[2], O_RDONLY);
     }
-    else if (argc == 2){
+    else if (argc == 2)
        fp = open(argv[1], O_RDONLY);
-    }
     else{
        printf("Too many arguments");
        exit(1);
     }
 
     if (fp == -1){                                                              // Check if the file can be opened or if its can't be seek'
-
         perror("Opening: ");                                                    // perror(const char *s), gives you a string b4 error msg
         exit(1);
     }
@@ -108,7 +105,7 @@ int main(int argc, char *argv[]){
                 }
                 else if (checkread == 0)                                        // error check
                 { 
-                    printf("\nEOF\n");
+                    //printf("\nEOF\n");
                     exit(0);
                 }
             }                                                                   // end of while
@@ -116,19 +113,46 @@ int main(int argc, char *argv[]){
         }                                                                       // end of if match == 1
 //************************************************************************* dont match, move forward on line1 and line2
         else{ 
+            // int check1, check2;
+            // check1 = lseek(fp, size_of_first_line + line1pos, SEEK_SET);        // go to 2nd
+
+            // if (check1 == -1)                                                   // error check
+            // { 
+            //     perror("Else Problem: ");
+            //     exit(1);
+            // }
+            // size_of_first_line = getsize(fp) + 1;
+
+            // check2 = lseek(fp, size_of_second_line + line2pos, SEEK_SET);       // get 2nd to 3rd
+            // line2pos += size_of_second_line + 1;                                // should go pos of 3rd line
+            // size_of_second_line = getsize(fp);
+
+            // if (check2 == -1)                                                   // error check
+            // {
+            //     perror("Else Problem: ");
+            //     exit(1);
+            // }
+
+            // if(debugvar == 1)
+            //     printf("\n%d,  %d  \n", size_of_first_line, size_of_second_line);
+
+            // if (size_of_first_line == size_of_second_line)
+            //     match = checkmatch(fp);
+
             int check1, check2;
-            check1 = lseek(fp, size_of_first_line + line1pos, SEEK_SET);        // go to 2nd
+            check1 = lseek(fp, size_of_first_line, SEEK_SET);                   // go to 2nd
 
             if (check1 == -1)                                                   // error check
-            { 
-
+            {
                 perror("Else Problem: ");
                 exit(1);
             }
-            size_of_first_line = getsize(fp) + 1;
+            line1pos += size_of_first_line - 1;
+
+            size_of_first_line = getsize(fp);
 
             check2 = lseek(fp, size_of_second_line + line2pos, SEEK_SET);       // get 2nd to 3rd
-            line2pos += size_of_second_line + 1;                                // should go pos of 3rd line
+            line2pos += size_of_second_line;                                    // should go pos of 3rd line
             size_of_second_line = getsize(fp);
 
             if (check2 == -1)                                                   // error check
@@ -137,19 +161,18 @@ int main(int argc, char *argv[]){
                 exit(1);
             }
 
-            if(debugvar == 1)
-                printf("\n%d,  %d  \n", size_of_first_line, size_of_second_line);
+            //if(debugvar == 1)
+                //printf("\n%d,  %d  \n", size_of_first_line, size_of_second_line);
 
             if (size_of_first_line == size_of_second_line)
                 match = checkmatch(fp);
+
         } // end of else
 //************************************************************************* 
-
     } // end of while
-
     // shouldnt get down here
     return 0;
-} // To Do: output with write()
+} // To Do: output with write() // end of main
 
 // functions:
 //************************************************************************* Get the size of the line
@@ -159,7 +182,7 @@ int getsize(int fp){
 
     while(1){
         readcheck = read(fp, &ch, 1);
-
+    
         if (readcheck == -1)                                                    // error check
         { 
             perror("getsize problem: ");
@@ -167,29 +190,34 @@ int getsize(int fp){
         }
         else if (readcheck == 0){
             if(debugvar == 1)
-                printf("EOF");
+                //printf("EOF");
             exit(0);
         }
 
-        else if (ch == '\n')                                                   // if we got to the new line, send the count back. Remember itll be +1 to the first line of next row
+        else if (ch == '\n'){                                                   // if we got to the new line, send the count back. Remember itll be +1 to the first line of next row
+            if(debugvar == 1)
+                printf("This is in getsize: %d\n", count);
             return count;
-        
+        }
         count++;
     }
 }
 //************************************************************************* 
 //************************************************************************* Check if the lines match
 int checkmatch(int fp){
-    int readcheck1, readcheck2, ret = 0, lseekcheck;
+    int readcheck1, readcheck2, ret = 0, lseekcheck1, lseekcheck2;
     char ch1, ch2;
-
+    //if(debugvar == 1)
+        printf("%d, %d  \n", line1pos, line2pos);
     while(ret == 0){
+        // seek to first line, this is new
+        lseek(fp, line1pos, SEEK_SET);
         readcheck1 = read(fp, &ch1, 1);                                     // read from first line
 
         // move to the 2nd line
-        lseekcheck = lseek(fp, line2pos, SEEK_SET);
+        lseekcheck1 = lseek(fp, line2pos, SEEK_SET);
 
-        if (lseekcheck == -1)                                               // error check
+        if (lseekcheck1 == -1)                                               // error check
         {
             perror("Else Problem: ");
             exit(1);
@@ -207,6 +235,8 @@ int checkmatch(int fp){
             perror("Readcheck1: ");
             exit(1);
         }
+        // increment pos
+        line1pos++, line2pos++; // new
     } // end of while
     return ret;
 } // end of function
