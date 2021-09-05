@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 {
 
     // Open and parse arguments
-//*************************************************************************
+    //*************************************************************************
     if (argc == 3)
     { // open(const char* path, int flag, [, int mode])
         if (strcmp(argv[1], "-d") == 0)
@@ -50,14 +50,15 @@ int main(int argc, char *argv[])
         perror("Cant Seek: ");
         exit(1);
     }
-//*************************************************************************
+    //*************************************************************************
 
     // var declarations
     int size_of_second_line = 0, size_of_first_line = 0, line1pos = 0, line2pos = 0, match = 0;
     while (1)
     {
-        // its the first two lines in the file, so we move one line down 
-        if(match == 0){
+        // its the first two lines in the file, so we move one line down
+        if (match == 0)
+        {
             // gets the size of the first line
             size_of_first_line = getsize(line1pos);
             //printf("\nThis is size of first: %d \n", size_of_first_line);
@@ -65,35 +66,39 @@ int main(int argc, char *argv[])
             line2pos = size_of_first_line + 1; // puts the 2nd lines pos on the start of the 2nd line
             //printf("\nThis is line2 %d \n", line2pos);
 
-
-            size_of_second_line = getsize(line2pos); // get size will set the lseek to where ever the argument is 
+            size_of_second_line = getsize(line2pos); // get size will set the lseek to where ever the argument is
 
             //printf("\nThis is size of 2nd:  %d\n", size_of_second_line);
 
             // if the line sizes match then they are possibly the same, if they are then we check
-            if(size_of_second_line == size_of_first_line){
+            if (size_of_second_line == size_of_first_line)
+            {
                 match = checkmatch(line1pos, line2pos);
                 lseek(fp, line1pos, SEEK_SET); // set pos at the line1pos
             }
-            else if(size_of_first_line != size_of_second_line)
+            else if (size_of_first_line != size_of_second_line)
                 match = 1;
-            
+
         } // end of if
-        if(match == -1){ // the lines match, print out one of them, then move the lines down 1
+        if (match == -1)
+        {                                  // the lines match, print out one of them, then move the lines down 1
             lseek(fp, line1pos, SEEK_SET); // go to 2nd line and print that out
 
             char tmp;
             int stopvar = 0, readcheck;
-            while(stopvar == 0){
+            while (stopvar == 0)
+            {
                 readcheck = read(fp, &tmp, 1);
 
                 // error check
-                if(readcheck == -1){
+                if (readcheck == -1)
+                {
                     perror("Readcheck1: ");
                     exit(1);
                 }
-                else if(readcheck == 0){
-                    if(debugvar == 1)
+                else if (readcheck == 0)
+                {
+                    if (debugvar == 1)
                         printf("\nEOF5\n");
                     exit(0);
                 }
@@ -110,8 +115,7 @@ int main(int argc, char *argv[])
 
             // move line1 down another line
             line1pos += size_of_first_line + 1;
-            size_of_second_line = getsize(line1pos);
-
+            size_of_first_line = getsize(line1pos);
 
             // move line2 info down 2 rows
             line2pos += size_of_second_line + 1;
@@ -127,9 +131,9 @@ int main(int argc, char *argv[])
             }
             if (size_of_second_line != size_of_first_line)
                 match = 1;
-
         }
-        if(match == 1){ // the lines dont match print out first
+        if (match == 1)
+        { // the lines dont match print out first
             lseek(fp, line1pos, SEEK_SET);
 
             // print out first line
@@ -180,33 +184,36 @@ int main(int argc, char *argv[])
             if (size_of_second_line != size_of_first_line)
                 match = 1;
         }
-        
-    }     // end of while
+
+    } // end of while
     // shouldnt get down here
     return 0;
 } // end of main
 
-
 // functions
-int getsize(int linepos){
+int getsize(int linepos)
+{
     char tmp;
     int count = 0, stopvar = 0;
     lseek(fp, linepos, SEEK_SET);
-    while(stopvar == 0){
+    while (stopvar == 0)
+    {
         read(fp, &tmp, 1); // read through
-        if(tmp == '\n') // its a new line so we stop
+        if (tmp == '\n')   // its a new line so we stop
             stopvar = 1;
         count++;
-    }  // end of loop
+    }                             // end of loop
     lseek(fp, linepos, SEEK_SET); // set the position back to what is was
     return count - 1;
 }
 
-int checkmatch(int line1pos, int line2pos){
+int checkmatch(int line1pos, int line2pos)
+{
     char ch1, ch2;
     int stopvar = 0, readcheck1, readcheck2, lseekcheck1, lseekcheck2, linecounter = 0;
 
-    while(stopvar == 0){
+    while (stopvar == 0)
+    {
         lseekcheck1 = lseek(fp, line1pos, SEEK_SET); // seek to first line
 
         // read the char from the first line
@@ -216,9 +223,9 @@ int checkmatch(int line1pos, int line2pos){
         lseekcheck2 = lseek(fp, line2pos, SEEK_SET);
         readcheck2 = read(fp, &ch2, 1);
 
-        if(debugvar == 1)
+        if (debugvar == 1)
             printf("\nThis is Ch1 and Ch2  %c    %c \n", ch1, ch2);
-        
+
         // error check
         if (readcheck1 == -1)
         {
@@ -261,16 +268,18 @@ int checkmatch(int line1pos, int line2pos){
                 printf("\nEOF4\n");
         }
 
-        if(ch1 == '\n'){
+        if (ch1 == '\n')
+        {
             return -1; // they are the same, print out 1 line only
         }
-        else if(ch1 != ch2){
+        else if (ch1 != ch2)
+        {
             return 1; // they arent the same, print first line and move lines down
         }
 
         line1pos++, line2pos++; // increment
     }
-    if(debugvar == 1)
+    if (debugvar == 1)
         printf("\nWE GOT DOWN HERE\n");
 }
 
@@ -280,10 +289,8 @@ if they arent the same print the line out
 if they are the same print one of the lines and move down
 if they arent the same size its unique
 if they are the same size check if they are the same
-
 To Do:
 - error checks for lseek, read, write
 - Debug info
 - if one of the lines is 0 then print the other to fix EOF issue?
 */
-
