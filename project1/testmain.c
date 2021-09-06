@@ -17,7 +17,7 @@ int getsize(int linepos);
 int checkmatch(int line1pos, int line2pos);
 
 // Global var
-int debugvar = 0, fp;
+int debugvar = 0, fp, exitvar = 0;
 
 int main(int argc, char *argv[])
 {
@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 
     // var declarations
     int size_of_second_line = 0, size_of_first_line = 0, line1pos = 0, line2pos = 0, match = 0;
-    while (1)
+    while (exitvar == 0)
     {
         // its the first two lines in the file, so we move one line down
         if (match == 0)
@@ -210,7 +210,7 @@ int getsize(int linepos)
 int checkmatch(int line1pos, int line2pos)
 {
     char ch1, ch2;
-    int stopvar = 0, readcheck1, readcheck2, lseekcheck1, lseekcheck2, linecounter = 0;
+    int stopvar = 0, readcheck1, readcheck2, lseekcheck1, lseekcheck2;
 
     while (stopvar == 0)
     {
@@ -236,6 +236,7 @@ int checkmatch(int line1pos, int line2pos)
         {
             if (debugvar == 1)
                 printf("\nEOF1\n");
+            exitvar = 1;
         }
         if (readcheck2 == -1)
         {
@@ -246,6 +247,7 @@ int checkmatch(int line1pos, int line2pos)
         {
             if (debugvar == 1)
                 printf("\nEOF2\n");
+            exitvar = 1;
         }
         if (lseekcheck1 == -1)
         {
@@ -256,6 +258,7 @@ int checkmatch(int line1pos, int line2pos)
         {
             if (debugvar == 1)
                 printf("\nEOF3\n");
+            exitvar = 1;
         }
         if (lseekcheck2 == -1)
         {
@@ -266,6 +269,7 @@ int checkmatch(int line1pos, int line2pos)
         {
             if (debugvar == 1)
                 printf("\nEOF4\n");
+            exitvar = 1;
         }
 
         if (ch1 == '\n')
